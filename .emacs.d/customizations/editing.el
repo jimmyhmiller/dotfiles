@@ -19,7 +19,7 @@
 (global-auto-revert-mode 1)
 
 ;; Highlight current line
-(global-hl-line-mode 1)
+(if (display-graphic-p) (global-hl-line-mode 1))
 
 ;; Interactive search key bindings. By default, C-s runs
 ;; isearch-forward, so this swaps the bindings.
@@ -35,8 +35,8 @@
 (ac-config-default)
 
 ;; add the emacs-eclim source
-(require 'ac-emacs-eclim-source)
-(ac-emacs-eclim-config)
+;(require 'ac-emacs-eclim-source)
+;(ac-emacs-eclim-config)
 
 
 ;(setq mac-command-modifier 'super)
@@ -44,7 +44,7 @@
 
 ;(global-set-key (kbd "s-z") 'undo) 
 (global-set-key (kbd "s-Z") 'undo-tree-redo)
-
+(global-set-key (kbd "M-j") 'join-line)
 
 
 ;; Don't use hard tabs

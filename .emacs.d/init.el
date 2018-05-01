@@ -145,13 +145,16 @@
  '(coffee-tab-width 2)
  '(custom-safe-themes
    (quote
-    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default))))
+    ("9e54a6ac0051987b4296e9276eecc5dfb67fdcd620191ee553f40a9b6d943e78" "5e52ce58f51827619d27131be3e3936593c9c7f9f9f9d6b33227be6331bf9881" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
+ '(package-selected-packages
+   (quote
+    (aggressive-indent wgrep-ag wgrep robe rubocop rvm rjsx-mode ag haskell-emacs pbcopy nodejs-repl markdown-preview-mode markdown-mode+ idris-mode indium neotree fiplr key-chord inf-ruby which-key clj-refactor zenburn-theme zenburn undo-tree web-mode tagedit solarized-theme smex rainbow-delimiters projectile paredit magit ido-ubiquitous exec-path-from-shell clojure-mode-extra-font-locking cider ac-emacs-eclim))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(default ((t (:inherit nil :stipple nil :foreground "#839496" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :height 140 :width normal :foundry "nil" :family "Menlo")))))
 
 (add-to-list 'default-frame-alist '(font . "Ubunto Mono" ))
 
@@ -171,12 +174,118 @@
 (require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
 
-(load-theme 'solarized t)
+(load-theme 'solarized-dark t)
 
 
 
 (require 'cider)
+
+
 (setq cider-cljs-lein-repl
       "(do (require 'figwheel-sidecar.repl-api)
            (figwheel-sidecar.repl-api/start-figwheel!)
            (figwheel-sidecar.repl-api/cljs-repl))")
+
+
+
+(require 'key-chord)
+(key-chord-define-global "bb" 'mode-line-other-buffer)
+(key-chord-define-global "zz" 'undo-tree-undo)
+(key-chord-define-global "ZZ" 'undo-tree-redo)
+(key-chord-mode +1)
+
+
+(global-set-key (kbd "C-x f") 'fiplr-find-file)
+
+(global-set-key (kbd "s-F") 'rgrep)
+
+
+(xterm-mouse-mode 1)
+
+(setq markdown-command "multimarkdown")
+
+
+(defun second-last (list)
+  (nth (- (length list) 2) list))
+
+(defun display-eval-expr-js ()
+  "Execute a command and output the result to the temporary buffer."
+  (interactive)
+  (let* ((start (save-excursion (nodejs-repl--beginning-of-expression)))
+        (end (point))
+        (command (buffer-substring start end))
+        (ret (nodejs-repl--send-string (concat command "\n"))))
+    (setq ret (replace-regexp-in-string nodejs-repl-ansi-color-sequence-re "" ret))
+    (setq ret (replace-regexp-in-string "\\(\\w\\|\\W\\)+\r\r\n" "" ret))
+    (setq ret (replace-regexp-in-string "\r" "" ret))
+    (print (split-string ret "\[1G\[0J> \[3G"))
+    (print "end \n")
+    (setq ret (second-last (split-string (string-trim ret) "\n")))
+    (cider--display-interactive-eval-result ret (point))))
+(add-hook 'js-mode-hook
+          (lambda ()
+            (define-key js-mode-map (kbd "C-c C-e") 'display-eval-expr-js)
+            (define-key js-mode-map (kbd "C-c C-j") 'nodejs-repl-send-line)
+            (define-key js-mode-map (kbd "C-c C-r") 'nodejs-repl-send-region)
+            (define-key js-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
+            (define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl)))
+
+(turn-on-pbcopy)
+
+
+(setq-default neo-window-width 60)
+
+
+(require 'mouse) ;; needed for iterm2 compatibility
+(xterm-mouse-mode t)
+(global-set-key [mouse-4] '(lambda ()
+                           (interactive)
+                           (scroll-down 1)))
+(global-set-key [mouse-5] '(lambda ()
+                           (interactive)
+                           (scroll-up 1)))
+(setq mouse-sel-mode t)
+(defun track-mouse (e))
+
+
+
+
+
+
+
+
+(require 'dash)
+
+(defcustom unity-repl-command "ruby repl-client.rb"
+  "Command to use for arcadia-repl.")
+
+(defcustom unity-repl-command-path "Assets/Arcadia/Editor"
+  "Launch the REPL command in this relative path.")
+
+(defun unity-root-p (dir)
+  "Is this DIR the root of a Unity project?"
+  (-any? (lambda (f)
+           ;; TODO: Maybe this could be better?
+           (string-equal f "ProjectSettings"))
+         (directory-files dir)))
+
+(defun unity-find-root (start levels)
+  "Look upwards from the START directory to find the Unity root directory 
+and return its full path. Search for the number of LEVELS specified."
+  (cond ((= levels 0) nil)
+        ((unity-root-p start) start)
+        (t (unity-find-root
+            (expand-file-name ".." start) (- levels 1)))))
+
+(defun unity-jack-in ()
+  "Start the Arcadia REPL"
+  (interactive)
+  (let ((default-directory
+          (concat (unity-find-root default-directory 10) "/"
+                  unity-repl-command-path "/")))
+    (run-lisp unity-repl-command)))
+
+(provide 'arcadia)
+
+
+(setq linum-format "%d ")

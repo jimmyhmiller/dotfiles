@@ -65,6 +65,7 @@
     (cider-interactive-eval (format "(def server (%s/start)) (println server)" ns))))
 
 
+
 (defun cider-refresh ()
   (interactive)
   (cider-interactive-eval (format "(user/reset)")))
@@ -91,5 +92,6 @@
      (define-key cider-mode-map (kbd "C-c u") 'cider-user-ns)
      (define-key cider-mode-map (kbd "C-c C-b") 'user/cider-send-to-repl)))
 
+(put-clojure-indent 's/fdef :defn)
 
 (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode)
