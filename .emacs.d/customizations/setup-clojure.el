@@ -93,5 +93,6 @@
      (define-key cider-mode-map (kbd "C-c C-b") 'user/cider-send-to-repl)))
 
 (put-clojure-indent 's/fdef :defn)
+(put-clojure-indent 'prop/for-all :defn)
 
 (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode)

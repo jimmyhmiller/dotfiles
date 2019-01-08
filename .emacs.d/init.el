@@ -13,7 +13,7 @@
 
 
 
-
+(require 'etags)
 
 ;; (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
 ;;                          ("marmalade" . "http://marmalade-repo.org/packages/")
@@ -145,10 +145,10 @@
  '(coffee-tab-width 2)
  '(custom-safe-themes
    (quote
-    ("9e54a6ac0051987b4296e9276eecc5dfb67fdcd620191ee553f40a9b6d943e78" "5e52ce58f51827619d27131be3e3936593c9c7f9f9f9d6b33227be6331bf9881" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
+    ("f27c3fcfb19bf38892bc6e72d0046af7a1ded81f54435f9d4d09b3bff9c52fc1" "9e54a6ac0051987b4296e9276eecc5dfb67fdcd620191ee553f40a9b6d943e78" "5e52ce58f51827619d27131be3e3936593c9c7f9f9f9d6b33227be6331bf9881" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
  '(package-selected-packages
    (quote
-    (aggressive-indent wgrep-ag wgrep robe rubocop rvm rjsx-mode ag haskell-emacs pbcopy nodejs-repl markdown-preview-mode markdown-mode+ idris-mode indium neotree fiplr key-chord inf-ruby which-key clj-refactor zenburn-theme zenburn undo-tree web-mode tagedit solarized-theme smex rainbow-delimiters projectile paredit magit ido-ubiquitous exec-path-from-shell clojure-mode-extra-font-locking cider ac-emacs-eclim))))
+    (dockerfile-mode docker flycheck-rust racer cargo rust-mode gruvbox-theme aggressive-indent wgrep-ag wgrep robe rubocop rvm rjsx-mode ag haskell-emacs pbcopy nodejs-repl markdown-preview-mode markdown-mode+ idris-mode indium neotree fiplr key-chord inf-ruby which-key clj-refactor zenburn-theme zenburn undo-tree web-mode tagedit solarized-theme smex rainbow-delimiters projectile paredit magit ido-ubiquitous exec-path-from-shell clojure-mode-extra-font-locking cider ac-emacs-eclim))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -181,10 +181,10 @@
 (require 'cider)
 
 
-(setq cider-cljs-lein-repl
-      "(do (require 'figwheel-sidecar.repl-api)
-           (figwheel-sidecar.repl-api/start-figwheel!)
-           (figwheel-sidecar.repl-api/cljs-repl))")
+
+
+
+(setq cider-default-repl-command "lein")
 
 
 
@@ -192,15 +192,18 @@
 (key-chord-define-global "bb" 'mode-line-other-buffer)
 (key-chord-define-global "zz" 'undo-tree-undo)
 (key-chord-define-global "ZZ" 'undo-tree-redo)
+(key-chord-define-global "jj" 'imenu)
 (key-chord-mode +1)
 
 
 (global-set-key (kbd "C-x f") 'fiplr-find-file)
 
-(global-set-key (kbd "s-F") 'rgrep)
+(global-set-key (kbd "s-F") 'rgrep) 
 
 
 (xterm-mouse-mode 1)
+
+(aggressive-indent-mode 1)
 
 (setq markdown-command "multimarkdown")
 
