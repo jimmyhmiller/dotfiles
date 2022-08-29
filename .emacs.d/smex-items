@@ -1,0 +1,23 @@
+
+;; ----- smex-history -----
+(
+ split-window-right
+ clojure-mode
+ cider-jack-in
+ clojure-thread-last-all
+ delete-trailing-whitespace
+ undo-tree-visualize
+ eval-buffer
+)
+
+;; ----- smex-data -----
+(
+ (eval-expression . 1)
+ (eval-buffer . 6)
+ (split-window-right . 6)
+ (undo-tree-visualize . 1)
+ (delete-trailing-whitespace . 3)
+ (clojure-thread-last-all . 2)
+ (cider-jack-in . 1)
+ (clojure-mode . 1)
+)

@@ -1,46 +1,54 @@
-source ~/.antigen-source/antigen.zsh
+export ZPLUG_HOME=/usr/local/opt/zplug
+source $ZPLUG_HOME/init.zsh
 
-alias elm='nocorrect elm'
-alias ping='nocorrect ping'
-alias status='git status'
-alias commit='git commit -am'
-alias push='git push origin'
-alias pull='git pull origin'
-alias codemod='codemod.py'
-alias reload='entr'
+zplug "zsh-users/zsh-syntax-highlighting"
+
+zplug mafredri/zsh-async, from:github
+zplug sindresorhus/pure, use:pure.zsh, from:github, as:theme
+zplug "plugins/autojump", from:oh-my-zsh
+
+if ! zplug check --verbose; then
+    printf "Install? [y/N]: "
+    if read -q; then
+        echo; zplug install
+    fi
+fi
+
+
+zplug load
+
 alias s='git status'
-alias myissues='ghi list -s 'open'  -N "3 - Ready for Deploy" -N "5 - Ready for Client Review" -N "4 - Ready for Verification"  -N "0 - Collecting Information" -u "jimmyhmiller"'
+
+export EDITOR=emacs
+alias changes='git add . && git commit -am "Changes" && git push'
+alias staged='git diff --staged'
+
+alias disassemble='yaxdis -a x86_64'
+setopt share_history
+
+alias -g pair-greg='--trailer "Co-authored-by: Grzegorz Caban <nabacg@gmail.com>"'
+setopt share_history
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search # Up
+bindkey "^[[B" down-line-or-beginning-search # Down
+
+# Be able to search forward
+stty -ixon
+
+# make git scroll with scroll wheel
+git config --global core.pager "less -+\$LESS -RS"
 
 
-run() {
-    number=$1
-    shift
-    for i in `seq $number`; do
-      $@
-    done
-}
+export PATH="/usr/local/opt/llvm/bin:$PATH"
+export LDFLAGS="-L/usr/local/opt/llvm/lib"
+export CPPFLAGS="-I/usr/local/opt/llvm/include"
+export LLVM_SYS_130_PREFIX="/usr/local/opt/llvm/"
 
-
-
-antigen use oh-my-zsh
-antigen bundle zsh-users/zsh-syntax-highlighting
-# antigen theme pygmalion
-antigen bundle mafredri/zsh-async
-antigen bundle sindresorhus/pure
-antigen apply
-
-[[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
-
-
-ZSH_THEME_GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[green]%}"
-ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
-ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[yellow]%}⚡%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_CLEAN=""
-
-
-# PROMPT='%{$fg[yellow]%}Mac Pro%{$reset_color%}%{$fg[red]%}:%{$reset_color%}%{$fg[cyan]%}%0~%{$reset_color%}%{$fg[red]%}|%{$reset_color%}$(git_prompt_info)%{$fg[cyan]%}⇒%{$reset_color%}  '
-function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
-
-# OPAM configuration
-. /Users/jimmyhmiller/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
+export PATH="/usr/local/opt/openssl@3/bin:$PATH"
+export PATH="/usr/local/opt/ruby/bin:$PATH"
+export PATH="/Library/Developer/CommandLineTools/Library/PrivateFrameworks/:$PATH"
+source /usr/local/opt/chruby/share/chruby/chruby.sh
 
