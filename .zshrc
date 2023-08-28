@@ -1,4 +1,4 @@
-export ZPLUG_HOME=/usr/local/opt/zplug
+export ZPLUG_HOME=/opt/homebrew/opt/zplug
 source $ZPLUG_HOME/init.zsh
 
 zplug "zsh-users/zsh-syntax-highlighting"
@@ -14,6 +14,24 @@ if ! zplug check --verbose; then
     fi
 fi
 
+snap_screen() {
+  if [ $# -eq 0 ]
+  then
+    name="screenshot.png"
+  else
+    name="$1.png"
+  fi
+  adb shell screencap -p /sdcard/$name
+  adb pull /sdcard/$name
+  adb shell rm /sdcard/$name
+  curr_dir=pwd
+  echo "save to `pwd`/$name"
+}
+
+
+export HISTSIZE=1000000000
+export SAVEHIST=$HISTSIZE
+setopt EXTENDED_HISTORY
 
 zplug load
 
@@ -23,8 +41,10 @@ export EDITOR=emacs
 alias changes='git add . && git commit -am "Changes" && git push'
 alias staged='git diff --staged'
 
-alias disassemble='yaxdis -a x86_64'
-setopt share_history
+alias disassemble='yaxdis -a armv8'
+
+# Appends every command to the history file once it is executed
+setopt inc_append_history
 
 alias -g pair-greg='--trailer "Co-authored-by: Grzegorz Caban <nabacg@gmail.com>"'
 setopt share_history
@@ -42,13 +62,29 @@ stty -ixon
 git config --global core.pager "less -+\$LESS -RS"
 
 
-export PATH="/usr/local/opt/llvm/bin:$PATH"
-export LDFLAGS="-L/usr/local/opt/llvm/lib"
-export CPPFLAGS="-I/usr/local/opt/llvm/include"
-export LLVM_SYS_130_PREFIX="/usr/local/opt/llvm/"
+export PATH="/opt/homebrew/opt/lvm/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -L/opt/homebrew/opt/openssl@3/lib -L/Users/jimmyhmiller/Documents/Code/PlayGround/rust/mamba/target/debug/"
+export CPPFLAGS="-I/opt/homebrew/opt/llvm/include -I/opt/homebrew/opt/openssl@3/include"
+# export LLVM_SYS_130_PREFIX="/usr/local/opt/llvm/"
 
-export PATH="/usr/local/opt/openssl@3/bin:$PATH"
-export PATH="/usr/local/opt/ruby/bin:$PATH"
-export PATH="/Library/Developer/CommandLineTools/Library/PrivateFrameworks/:$PATH"
-source /usr/local/opt/chruby/share/chruby/chruby.sh
+# export PATH="/Library/Developer/CommandLineTools/Library/PrivateFrameworks/:$PATH"
+source /opt/homebrew/opt/chruby/share/chruby/auto.sh
+[ -f /opt/homebrew/etc/profile.d/autojump.sh ] && . /opt/homebrew/etc/profile.d/autojump.sh
 
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+export PATH="/opt/homebrew/opt/openssl@3/bin:$PATH"
+export PATH="/opt/homebrew/opt/bison/bin:$PATH"
+export PATH="/Users/jimmyhmiller/.cargo/bin/:$PATH"
+source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
+export LIBRARY_PATH="$LIBRARY_PATH:/opt/homebrew/lib"
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+export PATH="/Users/jimmyhmiller/.local/bin:$PATH"
+export PATH="/Users/jimmyhmiller/Downloads/flutter/bin:$PATH"
+export PATH="/Users/jimmyhmiller/Library/Android/sdk/platform-tools/:$PATH"
+
+
+export ANDROID_HOME="/Users/jimmyhmiller/Library/Android/sdk/"
+
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"
