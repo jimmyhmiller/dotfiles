@@ -43,6 +43,10 @@ alias staged='git diff --staged'
 
 alias disassemble='yaxdis -a armv8'
 
+
+# Set word characters (remove / to make it a word boundary for Alt+arrows)
+export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
+
 # Appends every command to the history file once it is executed
 setopt inc_append_history
 
