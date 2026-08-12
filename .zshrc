@@ -1,18 +1,46 @@
-export ZPLUG_HOME=/opt/homebrew/opt/zplug
-source $ZPLUG_HOME/init.zsh
-
-zplug "zsh-users/zsh-syntax-highlighting"
-
-zplug mafredri/zsh-async, from:github
-zplug sindresorhus/pure, use:pure.zsh, from:github, as:theme
-zplug "plugins/autojump", from:oh-my-zsh
-
-if ! zplug check --verbose; then
-    printf "Install? [y/N]: "
-    if read -q; then
-        echo; zplug install
-    fi
+# Bootstrap zplug on a new machine, but keep package-manager work out of the
+# normal startup path. Support both Apple Silicon and Intel Homebrew prefixes.
+if [[ -r /opt/homebrew/opt/zplug/init.zsh ]]; then
+  export ZPLUG_HOME=/opt/homebrew/opt/zplug
+elif [[ -r /usr/local/opt/zplug/init.zsh ]]; then
+  export ZPLUG_HOME=/usr/local/opt/zplug
+elif (( $+commands[brew] )); then
+  echo "Installing zplug (first shell on this machine)..."
+  brew install zplug
+  export ZPLUG_HOME="$(brew --prefix zplug)"
 fi
+
+zplug_syntax="$ZPLUG_HOME/repos/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh"
+zplug_pure="$ZPLUG_HOME/repos/sindresorhus/pure/pure.zsh"
+zplug_omz="$ZPLUG_HOME/repos/robbyrussell/oh-my-zsh"
+
+if [[ -r "$zplug_syntax" && -r "$zplug_pure" && -r "$zplug_omz/plugins/autojump/autojump.plugin.zsh" ]]; then
+  # Fast path: load installed plugins directly without initializing zplug,
+  # inspecting repositories, rebuilding caches, or acquiring locks.
+  fpath=("${zplug_pure:h}" $fpath)
+  autoload -Uz compinit
+  compinit
+  source "$zplug_omz/lib/functions.zsh"
+  source "$zplug_omz/plugins/autojump/autojump.plugin.zsh"
+  source "$zplug_pure"
+  source "$zplug_syntax"
+elif [[ -r "$ZPLUG_HOME/init.zsh" ]]; then
+  # Bootstrap path: reached on a new machine or after adding a plugin here.
+  source "$ZPLUG_HOME/init.zsh"
+  zplug "zsh-users/zsh-syntax-highlighting"
+  zplug sindresorhus/pure, use:pure.zsh, from:github, as:theme
+  zplug "plugins/autojump", from:oh-my-zsh
+
+  if ! zplug check; then
+    echo "Installing missing zsh plugins (first run only)..."
+    zplug install
+  fi
+  zplug load
+else
+  echo "zplug is unavailable; install Homebrew or zplug to enable shell plugins" >&2
+fi
+
+unset zplug_syntax zplug_pure zplug_omz
 
 snap_screen() {
   if [ $# -eq 0 ]
@@ -32,8 +60,6 @@ snap_screen() {
 export HISTSIZE=1000000000
 export SAVEHIST=$HISTSIZE
 setopt EXTENDED_HISTORY
-
-zplug load
 
 alias s='git status'
 
@@ -63,7 +89,9 @@ bindkey "^[[B" down-line-or-beginning-search # Down
 stty -ixon
 
 # make git scroll with scroll wheel
-git config --global core.pager "less -+\$LESS -RS"
+if (( $+commands[git] )) && [[ "$(git config --global --get core.pager)" != 'less -+$LESS -RS' ]]; then
+  git config --global core.pager 'less -+$LESS -RS'
+fi
 
 
 export PATH="/opt/homebrew/opt/lvm/bin:$PATH"
@@ -73,7 +101,6 @@ export CPPFLAGS="-I/opt/homebrew/opt/llvm/include -I/opt/homebrew/opt/openssl@3/
 
 # export PATH="/Library/Developer/CommandLineTools/Library/PrivateFrameworks/:$PATH"
 source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-[ -f /opt/homebrew/etc/profile.d/autojump.sh ] && . /opt/homebrew/etc/profile.d/autojump.sh
 
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 export PATH="/opt/homebrew/opt/openssl@3/bin:$PATH"
@@ -91,4 +118,17 @@ export PATH="/Users/jimmyhmiller/Library/Android/sdk/platform-tools/:$PATH"
 export ANDROID_HOME="/Users/jimmyhmiller/Library/Android/sdk/"
 
 export PATH="$HOME/.jenv/bin:$PATH"
-eval "$(jenv init -)"
+if (( $+commands[jenv] )); then
+  jenv_init_cache="$HOME/.cache/zsh/jenv-init.zsh"
+  if [[ ! -s "$jenv_init_cache" || "$commands[jenv]" -nt "$jenv_init_cache" ]]; then
+    mkdir -p "${jenv_init_cache:h}"
+    jenv_init_cache_tmp="$jenv_init_cache.$$.new"
+    if jenv init - >| "$jenv_init_cache_tmp"; then
+      mv "$jenv_init_cache_tmp" "$jenv_init_cache"
+    else
+      rm -f "$jenv_init_cache_tmp"
+    fi
+  fi
+  [[ -r "$jenv_init_cache" ]] && source "$jenv_init_cache"
+  unset jenv_init_cache jenv_init_cache_tmp
+fi
